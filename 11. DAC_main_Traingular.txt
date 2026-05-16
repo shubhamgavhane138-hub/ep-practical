@@ -1,0 +1,54 @@
+/*
+DAC  Mapping :  DAC Output (AOUT)-> P0.25
+*/
+
+#include"LPC214x.h"
+
+#define DACPinMask 1 << 19
+#define DAC_DataMask 0x0000FFC0
+/*#define DataShift 6 */
+
+void DACInit(void)
+{
+int i;
+//Set P0.25 as AOUT Pin for analog output
+i = PINSEL1;
+i = (i & 0xFFF3FFFF );
+PINSEL1 = (i | DACPinMask);
+
+DACR = 1 << 16 ; 			//set the settling time to 2.5us and max current to 300uA
+
+}
+
+void delay(unsigned int time)
+{
+unsigned int i,j;
+
+ for(i = 0; i < time ;i++ )
+ {
+	for(j = 0; j < 10000 ; j++);
+ }
+
+}
+
+int main(void)
+{
+int i;
+
+  DACInit();						// initialsie the DAC interface
+
+ while(1)
+ {
+  for(i = 0 ; i < 1024 ;i++ )		// send data to DAC
+  {
+  		DACR = ( DAC_DataMask &	(i <<6));
+  		delay(2);
+  }
+  for(i = 1023 ; i > 0 ;i-- )		// send data to DAC
+  {
+  		DACR = ( DAC_DataMask &	(i << 6));
+  		delay(2);
+  }
+ }
+return 0;
+}
